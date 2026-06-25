@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>湘遇AI · 与红色人物对话</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', '微软雅黑', Roboto, 'Helvetica Neue', sans-serif;
+            background: #fef7e8;  /* 暖米色底 */
+            background-image: linear-gradient(145deg, #fff9f0 0%, #faeecd 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            border: 1px solid rgba(200, 60, 30, 0.2);
+        }
+
+        /* 头部红区 */
+        .header {
+            background: linear-gradient(135deg, #b22222 0%, #8b0000 100%);
+            color: white;
+            padding: 28px 24px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* 人物卡片区 */
+        .hero-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 30px 20px;
+            background: white;
+            justify-content: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .hero-card {
+            flex: 1;
+            min-width: 140px;
+            background: #fffaf5;
+            border-radius: 28px;
+            padding: 20px 12px 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+        }
+
+        .hero-card:hover {
+            transform: translateY(-5px);
+            background: #fff4e8;
+            border-color: #b22222;
+        }
+
+        .hero-card.active {
+            background: #fff0e0;
+            border-color: #b22222;
+            box-shadow: 0 8px 18px rgba(178,34,34,0.2);
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #b22222;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 44px;
+            background: #8b3c2c;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .hero-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+            color: #4a2518;
+        }
+
+        .hero-card p {
+            font-size: 0.75rem;
+            color: #7a4c3a;
+        }
+
+        /* 对话区域 */
+        .chat-section {
+            display: none;
+            padding: 24px;
+            background: #fcf8f0;
+        }
+
+        .chat-section.active {
+            display: block;
+        }
+
+        .chat-box {
+            background: #fffaf2;
+            border-radius: 28px;
+            padding: 20px;
+            height: 380px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #f3e1c0;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .message {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message.ai {
+            align-items: flex-start;
+        }
+
+        .bubble {
+            max-width: 85%;
+            padding: 12px 18px;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .user .bubble {
+            background: #d84c2c;
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .ai .bubble {
+            background: white;
+            color: #2c2418;
+            border: 1px solid #e5cfb0;
+            border-bottom-left-radius: 6px;
+        }
+
+        .preset-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            background: #fff2e2;
+            border: 1px solid #dbbc90;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #5e2a1c;
+        }
+
+        .preset-btn:hover {
+            background: #ffe0c0;
+            border-color: #b65c30;
+            transform: scale(0.97);
+        }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 60px;
+            border: 1px solid #ecdbb8;
+        }
+
+        .input-area input {
+            flex: 1;
+            border: none;
+            padding: 12px 8px;
+            font-size: 0.95rem;
+            outline: none;
+            background: transparent;
+        }
+
+        .input-area button {
+            background: #b22222;
+            border: none;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .input-area button:hover {
+            background: #8b1e1e;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #b68b40;
+            padding: 4px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #f3e1c0;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 30px;
+            margin-bottom: 18px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #7a3e28;
+        }
+
+        footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 0.7rem;
+            color: #a28a6e;
+            border-top: 1px solid #efdecb;
+            background: white;
+        }
+
+        @media (max-width: 550px) {
+            .hero-grid { gap: 10px; }
+            .hero-card { min-width: 100px; padding: 12px 6px; }
+            .avatar { width: 60px; height: 60px; font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🗣️ 湘遇AI</h1>
+        <p>—— 与湖湘红色历史人物 跨时空对话</p>
+    </div>
+    <!-- 人物卡片区 -->
+    <div id="heroList" class="hero-grid"></div>
+
+    <!-- 对话界面（动态显示） -->
+    <div id="chatContainer" class="chat-section">
+        <div class="chat-section active">
+            <button id="backBtn" class="back-btn">← 返回人物选择</button>
+            <div id="chatBox" class="chat-box">
+                <div class="message ai"><div class="bubble">✨ 你好！我是历史青年助手，请先选择上方人物开始对话 ✨</div></div>
+            </div>
+            <div id="presetArea" class="preset-questions"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="向我提问吧（自由模式）...">
+                <button id="sendBtn">发送</button>
+            </div>
+            <div id="loadingMsg" class="loading" style="display: none;">🤖 红魂思考中 ······</div>
+        </div>
+    </div>
+    <footer>⚡ AI 生成内容仅供参考，请以权威史料为准｜研究性学习公益项目</footer>
+</div>
+
+<script>
+    // ---------- 人物配置 ----------
+    const heroes = [
+        { id: 'mzd', name: '毛泽东', shortDesc: '青年求索 · 实事求是', systemPrompt: `你正在扮演青年毛泽东（1893-1976）。当前时期设定为青年时期（约1913-1921年，在湖南第一师范求学和新民学会活动期间）。你的性格特征：志向远大、勤奋刻苦、关心工农疾苦、善于思考、喜欢用生动比喻表达观点。你的语言风格：朴实有力，偶尔引用古文，带有湖南乡土气息但通俗易懂。你的回答应体现：1.实事求是：从实际出发思考问题，不空谈；2.心忧天下：始终关心国家和人民的命运；3.知行合一：强调理论和实践相结合；4.艰苦奋斗：展现刻苦求学的精神。在回答中，可以引用你在第一师范求学时期的真实经历（如征友启事、洗冷水澡、文明其精神野蛮其体魄等），以及新民学会创办、留法勤工俭学组织等真实背景。如果被问到超出这一时期或你知识范围的内容，可回答：“这个问题在我青年时期还无法预见，建议你查阅《毛泽东年谱》等史料了解更多。”回答长度控制在80-200字之间，语气亲切但不失庄重，避免过度娱乐化和网络用语。` },
+        { id: 'chs', name: '蔡和森', shortDesc: '理论求索 · 建党先驱', systemPrompt: `你正在扮演蔡和森（1895-1931），中国共产党早期重要领导人，马克思主义理论家。当前时期设定为青年时期（约1918-1925年，留法勤工俭学及回国初期）。你的性格特征：思维缜密、理论功底深厚、善于思辨、意志坚定。语言风格：理性严谨、逻辑清晰、富有说服力。回答应体现：1.理论求索：强调马克思主义理论的学习和研究；2.实践导向：理论联系实际，指导中国革命；3.坚定信仰：展现对共产主义的忠诚。可以提及你在法国“猛看猛译”马克思主义著作的经历，第一个提出“明目张胆正式成立一个中国共产党”的史实，以及主编《向导》周报的经历。回答长度80-200字，语气理性但不失激情。` },
+        { id: 'xqy', name: '向警予', shortDesc: '妇女解放 · 革命英烈', systemPrompt: `你正在扮演向警予（1895-1928），中国共产党早期重要领导人，中国妇女运动先驱。当前时期设定为青年时期（约1916-1925年，创办溆浦女校至留法勤工俭学回国初期）。你的性格特征：勇敢坚定、热情洋溢、富有感染力、具有强烈的正义感。语言风格：铿锵有力、富有感染力、简洁明快。回答应体现：1.妇女解放：倡导男女平等，为妇女争取权益；2.教育救国：通过教育唤醒民众；3.革命信念：为理想奋斗到底。可以提及创办溆浦女校、改名“警予”的用意、赴法勤工俭学、参与建党等经历。回答长度80-200字，语气热情但庄重，体现革命女性的坚定与温情。` }
+    ];
+
+    // 预设问题库（按角色分类）
+    const presetMap = {
+        mzd: [
+            '您在湖南第一师范求学时，有哪些难忘的经历？',
+            '您为什么提出“文明其精神，野蛮其体魄”？',
+            '您当年发起成立新民学会，初衷是什么？',
+            '您是怎样找到马克思主义这个真理的？',
+            '您觉得青年人应该如何选择人生道路？',
+            '您如何看待“实事求是”这个理念？'
+        ],
+        chs: [
+            '您为什么在法国勤工俭学期间提出要建立中国共产党？',
+            '您和毛泽东在新民学会是如何认识的？',
+            '您在法国是怎样学习和传播马克思主义的？',
+            '您主编《向导》周报的初衷是什么？',
+            '您认为马克思主义对中国革命有怎样的意义？',
+            '您最想对今天的青年说些什么？'
+        ],
+        xqy: [
+            '您为什么在溆浦创办女子学校？',
+            '您是怎样走上革命道路的？',
+            '您为什么主张男女平等、妇女解放？',
+            '您和蔡和森在法国是如何共同奋斗的？',
+            '作为中国共产党第一位女中央委员，您有什么想对当代女青年说的？',
+            '您认为妇女解放和革命事业有什么关系？'
+        ]
+    };
+
+    let currentHero = null;
+
+    // ---------- 渲染人物卡片 ----------
+    const heroDiv = document.getElementById('heroList');
+    heroes.forEach(hero => {
+        const card = document.createElement('div');
+        card.className = 'hero-card';
+        card.innerHTML = `
+            <div class="avatar">✊</div>
+            <h3>${hero.name}</h3>
+            <p>${hero.shortDesc}</p>
+        `;
+        card.onclick = () => selectHero(hero);
+        heroDiv.appendChild(card);
+    });
+
+    function selectHero(hero) {
+        currentHero = hero;
+        // 高亮卡片
+        document.querySelectorAll('.hero-card').forEach(card => card.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        // 清空对话区域并显示
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.classList.add('active');
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = `<div class="message ai"><div class="bubble">👋 我是${hero.name}。请问你想了解什么？点击下方问题或直接输入。</div></div>`;
+        // 刷新预设按钮
+        const presetDiv = document.getElementById('presetArea');
+        const presetList = presetMap[hero.id] || [];
+        presetDiv.innerHTML = '';
+        presetList.forEach(q => {
+            const btn = document.createElement('button');
+            btn.innerText = q;
+            btn.className = 'preset-btn';
+            btn.onclick = () => sendMessage(q);
+            presetDiv.appendChild(btn);
+        });
+        // 自动滚动到页面可见位置
+        chatContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 调用后端API代理（Vercel Serverless Function）
+    async function callAPI(question) {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                character: currentHero.name,
+                systemPrompt: currentHero.systemPrompt,
+                userMessage: question
+            })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        return data.reply;
+    }
+
+    // 发送消息（支持预设+自由）
+    async function sendMessage(question) {
+        if (!currentHero) {
+            alert('请先从上方选择一位历史人物');
+            return;
+        }
+        if (!question.trim()) return;
+        const chatBox = document.getElementById('chatBox');
+        // 显示用户消息
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = 'message user';
+        userMsgDiv.innerHTML = `<div class="bubble">${escapeHtml(question)}</div>`;
+        chatBox.appendChild(userMsgDiv);
+        // 清空输入框
+        document.getElementById('userInput').value = '';
+        // 显示加载动画
+        const loadingDiv = document.getElementById('loadingMsg');
+        loadingDiv.style.display = 'block';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const reply = await callAPI(question);
+            const aiMsgDiv = document.createElement('div');
+            aiMsgDiv.className = 'message ai';
+            aiMsgDiv.innerHTML = `<div class="bubble">${escapeHtml(reply)}</div>`;
+            chatBox.appendChild(aiMsgDiv);
+        } catch (err) {
+            console.error(err);
+            const errDiv = document.createElement('div');
+            errDiv.className = 'message ai';
+            errDiv.innerHTML = `<div class="bubble">⚠️ 网络或服务异常，请稍后再试。研习探索不惧风浪，再试一次吧！</div>`;
+            chatBox.appendChild(errDiv);
+        } finally {
+            loadingDiv.style.display = 'none';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    // 简单防XSS
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 绑定UI
+    document.getElementById('sendBtn').onclick = () => {
+        const input = document.getElementById('userInput').value;
+        sendMessage(input);
+    };
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const input = document.getElementById('userInput').value;
+            sendMessage(input);
+        }
+    });
+    document.getElementById('backBtn').onclick = () => {
+        currentHero = null;
+        document.querySelectorAll('.hero-card').forEach(card => card.classList.remove('active'));
+        document.getElementById('chatContainer').classList.remove('active');
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '<div class="message ai"><div class="bubble">✨ 你好！我是历史青年助手，请先选择上方人物开始对话 ✨</div></div>';
+    };
+</script>
+</body>
+</html>
